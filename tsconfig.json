@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    /* Visit https://aka.ms/tsconfig to read more about this file */
+    /* Language and Environment */
+    "target": "es2020", /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
+    // "lib": [],                                        /* Specify a set of bundled library declaration files that describe the target runtime environment. */
+    // "moduleDetection": "auto",                        /* Control what method is used to detect module-format JS files. */
+    /* Modules */
+    "module": "commonjs", /* Specify what module code is generated. */
+    "types": [
+      "node"
+    ], /* Specify type package names to be included without being referenced in a source file. */
+    /* JavaScript Support */
+    "allowJs": false, /* Allow JavaScript files to be a part of your program. Use the 'checkJS' option to get errors from these files. */
+    "checkJs": false, /* Enable error reporting in type-checked JavaScript files. */
+    /* Emit */
+    // "inlineSourceMap": true,                          /* Include sourcemap files inside the emitted JavaScript. */
+    "outDir": "./lib", /* Specify an output folder for all emitted files. */
+    "removeComments": true, /* Disable emitting comments. */
+    "importHelpers": true, /* Allow importing helper functions from tslib once per project, instead of including them per-file. */
+    "preserveConstEnums": true, /* Disable erasing 'const enum' declarations in generated code. */
+    "esModuleInterop": true, /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */
+    "forceConsistentCasingInFileNames": true, /* Ensure that casing is correct in imports. */
+    /* Type Checking */
+    "strict": true, /* Enable all strict type-checking options. */
+    "noImplicitAny": true, /* Enable error reporting for expressions and declarations with an implied 'any' type. */
+    // "strictNullChecks": true,                         /* When type checking, take into account 'null' and 'undefined'. */
+    // "strictFunctionTypes": true,                      /* When assigning functions, check to ensure parameters and the return values are subtype-compatible. */
+    // "strictBindCallApply": true,                      /* Check that the arguments for 'bind', 'call', and 'apply' methods match the original function. */
+    // "strictPropertyInitialization": true,             /* Check for class properties that are declared but not set in the constructor. */
+    // "noImplicitThis": true,                           /* Enable error reporting when 'this' is given the type 'any'. */
+    // "useUnknownInCatchVariables": true,               /* Default catch clause variables as 'unknown' instead of 'any'. */
+    "alwaysStrict": true, /* Ensure 'use strict' is always emitted. */
+    "skipLibCheck": true /* Skip type checking all .d.ts files. */
+  },
+  "include": [
+    "./src/**/*"
+  ]
+}
