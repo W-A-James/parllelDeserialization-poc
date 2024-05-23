@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "npx tsc",
+    "test": "npm run build && npx mocha test/iter_bson.test.ts"
   },
   "keywords": [],
   "author": "",
