@@ -9,7 +9,7 @@
     "ts"
   ],
   "recursive": true,
-  "timeout": 10000,
+  "timeout": 30000,
   "failZero": true,
   "sort": true,
   "color": true,

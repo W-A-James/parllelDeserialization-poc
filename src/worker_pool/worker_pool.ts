@@ -1,7 +1,10 @@
+// Adapted from sample here: https://nodejs.org/docs/latest/api/async_context.html#using-asyncresource-for-a-worker-thread-pool
+//
 import { AsyncResource } from 'node:async_hooks';
 import { EventEmitter } from 'node:events';
 import { promisify } from 'node:util';
 import { Worker } from 'node:worker_threads';
+import { join } from 'node:path';
 
 const kTaskInfo = Symbol('kTaskInfo');
 const kWorkerFreedEvent = Symbol('kWorkerFreedEvent');
@@ -58,7 +61,7 @@ export class WorkerPool<T> extends EventEmitter {
   }
 
   addNewWorker(taskHandler: (...args: any[]) => any) {
-    const worker = new PoolMember('./worker.js', { workerData: taskHandler.toString() });
+    const worker = new PoolMember(join(__dirname, 'worker.js'), { workerData: taskHandler.toString() });
     worker.on('message', (result) => {
       // In case of success: Call the callback that was passed to `runTask`,
       // remove the `TaskInfo` associated with the Worker, and mark it as free

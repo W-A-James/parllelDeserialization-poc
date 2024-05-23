@@ -1,21 +1,35 @@
-import { WorkerPool } from '../src/worker_pool/worker_pool';
+import { equal } from 'node:assert';
 
 
-(async function() {
-  const workerPool = new WorkerPool(4, (nums: bigint[]) => {
-    return nums.reduce((acc, x) => acc + x);
-  });
+import { WorkerPool } from '../lib/worker_pool/worker_pool.js';
 
-  const numbers = Array.from({ length: 5_000_000 }, (_, i) => BigInt(i));
+describe('WorkerPool', function() {
+  it('accumulates results correctly', async () => {
+    const workerPool = new WorkerPool(4, (start: bigint, end: bigint) => {
+      let sum = 0n;
+      for (let i = start; i < end; i++) {
+        sum += i * i;
+      }
+      return sum;
+    });
 
-  const promises: Promise<any>[] = [];
+    const N = 5_000_000_000n;
+    const promises: Promise<any>[] = [];
 
-  for (let i = 0; i < 4; i++) {
-    const n = Math.floor(numbers.length / 4);
-    promises.push(workerPool.runTaskAsync({ args: [numbers.slice(i * n, i * n + n)] }));
-  }
+    for (let i = 0n; i < 4n; i++) {
+      const n = N / 4n;
+      promises.push(workerPool.runTaskAsync({ args: [i * n, i * n + n] }));
+    }
 
-  const values = await Promise.all(promises);
-  console.log(values.reduce((acc, x) => acc + x));
-  workerPool.close();
-})();
+    let serSum = 0n;
+    for (let i = 0n; i < N; i++) {
+      serSum += i;
+    }
+
+    const sum = (await Promise.all(promises)).reduce((acc, x) => acc + x);
+    workerPool.close();
+
+    equal(sum, serSum);
+  })
+});
+
