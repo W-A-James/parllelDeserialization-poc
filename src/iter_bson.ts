@@ -199,7 +199,6 @@ function handleWithDocRoot(root: Record<string, any>, q: QueueEntry[], slice: Ui
         length,
         root[name].scope]
       );
-      console.log(root[name]);
     }
   }
 }
@@ -249,8 +248,9 @@ export function iterDeserialize(bsonDoc: Uint8Array, f?: (el: QueueEntry) => any
   const q: Queue = [
     [0, 3, 0, 0, 0, onDemand.NumberUtils.getInt32LE(bsonDoc, 0), root] // Root document
   ];
-  while (q.length > 0) {
-    const [totalOffset, type, _, __, docOffset, docLength, root] = q.shift() ?? [0, 0, 0, 0, 0, 0, {} as Record<string, any>];
+  let entry: QueueEntry | undefined;
+  while (entry = q.shift()) {
+    const [totalOffset, type, _, __, docOffset, docLength, root] = entry;
     // FIXME: not currently working for code w scope
     if (type === 3 || type === 4 || type === 15) { // if parsing subdocument or array or code with scope
       const slice = s.slice(totalOffset, totalOffset + docOffset + docLength);
