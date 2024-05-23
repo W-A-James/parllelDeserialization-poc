@@ -1,35 +1,4 @@
-import { serialize, deserialize, onDemand, Code } from 'bson';
-import { inspect } from 'node:util';
-import { deepEqual } from 'node:assert';
-
-
-const d = {
-  a: 10,
-  b: true,
-  c: 6n,
-  d: {
-    a: 1,
-    b: /hello/,
-    c: 1.2,
-    d: {
-      tweet: "hello darkness",
-      subDoc: {
-        a: 1.2,
-        c: 14,
-        codeWScope: new Code(() => {
-          // @ts-expect-error 
-          console.log(hello)
-        }, { hello: 100 }),
-        has: {
-          $key: 100,
-          arr: [
-            1, 2, 3, 4, 5, 6, 7, 8
-          ]
-        }
-      }
-    }
-  }
-};
+import { onDemand } from 'bson';
 
 type BSONElement = [
   /* type identifier */
@@ -45,8 +14,8 @@ type BSONElement = [
 ]
 
 export type QueueEntry = [
-  /* offset of parent document relative to start of _buffer_ */
-  parentOffset: number,
+  /* offset of document relative to start of _buffer_ */
+  totalOffset: number,
   /* type identifier */
   type: number,
   /* offset of name relative to start of _document_ */
@@ -60,9 +29,7 @@ export type QueueEntry = [
   root: Record<string, any> | any[]
 ]
 
-type Queue = QueueEntry[];
-
-const s = serialize(d);
+export type Queue = QueueEntry[];
 
 function getBinString(buffer: Uint8Array): string {
   const arr: string[] = [];
@@ -191,7 +158,7 @@ function handleWithDocRoot(root: Record<string, any>, q: QueueEntry[], slice: Ui
       const codeLength = onDemand.NumberUtils.getInt32LE(slice, offset + 4);
       q.push([
         // offset + int32(size of entire element) + int32(size of code string) + size of code string
-        totalOffset + offset + 4 + 4 + codeLength, // FIXME: Correctly implement offset for scope for code w/scope
+        totalOffset + offset, // FIXME: Correctly implement offset for scope for code w/scope
         type,
         nameOffset,
         nameLength,
@@ -253,7 +220,7 @@ export function iterDeserialize(bsonDoc: Uint8Array, f?: (el: QueueEntry) => any
     const [totalOffset, type, _, __, docOffset, docLength, root] = entry;
     // FIXME: not currently working for code w scope
     if (type === 3 || type === 4 || type === 15) { // if parsing subdocument or array or code with scope
-      const slice = s.slice(totalOffset, totalOffset + docOffset + docLength);
+      const slice = bsonDoc.slice(totalOffset, totalOffset + docOffset + docLength);
       const elements = onDemand.parseToElements(slice);
 
       if (isDoc(root, type)) {
@@ -267,7 +234,3 @@ export function iterDeserialize(bsonDoc: Uint8Array, f?: (el: QueueEntry) => any
   }
   return root;
 }
-
-iterDeserialize(s, () => { });
-
-deepEqual(iterDeserialize(s, () => { }), deserialize(s, { promoteLongs: true, promoteValues: true, promoteBuffers: true, useBigInt64: true }))
