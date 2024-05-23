@@ -1,5 +1,4 @@
 import { onDemand } from 'bson';
-import { inspect } from 'node:util';
 
 type BSONElement = [
   /* type identifier */
