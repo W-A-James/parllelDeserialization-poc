@@ -45,7 +45,7 @@ function isArray(root: Record<string, any> | Array<any>, type: number): root is 
 }
 
 function isDoc(root: Record<string, any> | Array<any>, type: number): root is Record<string, any> {
-  return type === 3;
+  return type === 3 || type === 15;
 }
 
 function parseRegex(slice: Uint8Array, offset: number): RegExp {
@@ -156,14 +156,15 @@ function handleWithDocRoot(root: Record<string, any>, q: QueueEntry[], slice: Ui
         length, root[name]]);
     } else if (type === 15) {
       const codeLength = onDemand.NumberUtils.getInt32LE(slice, offset + 4);
+      const docLength = onDemand.NumberUtils.getInt32LE(slice, offset + 8 + codeLength);
       q.push([
         // offset + int32(size of entire element) + int32(size of code string) + size of code string
-        totalOffset + offset, // FIXME: Correctly implement offset for scope for code w/scope
+        totalOffset + offset + 8 + codeLength, // FIXME: Correctly implement offset for scope for code w/scope
         type,
         nameOffset,
         nameLength,
-        offset,
-        length,
+        0,
+        docLength,
         root[name].scope]
       );
     }
@@ -195,14 +196,14 @@ function handleWithArrayRoot(root: any[], q: QueueEntry[], slice: Uint8Array, el
         length, root[root.length - 1]]);
     } else if (type === 15) {
       const codeLength = onDemand.NumberUtils.getInt32LE(slice, offset + 4);
-      const docLength = onDemand.NumberUtils.getInt32LE(slice, offset + 4 + 4 + codeLength);
+      const docLength = onDemand.NumberUtils.getInt32LE(slice, offset + 8 + codeLength);
       q.push([
         // offset + int32(size of entire element) + int32(size of code string) + size of code string
-        totalOffset + offset + docLength,
+        totalOffset + offset + 8 + codeLength,
         type,
         nameOffset,
         nameLength,
-        offset + 4 + 4 + 1 + codeLength,
+        0,
         docLength,
         root[root.length - 1].scope]
       )
@@ -218,7 +219,6 @@ export function iterDeserialize(bsonDoc: Uint8Array, f?: (el: QueueEntry) => any
   let entry: QueueEntry | undefined;
   while (entry = q.shift()) {
     const [totalOffset, type, _, __, docOffset, docLength, root] = entry;
-    // FIXME: not currently working for code w scope
     if (type === 3 || type === 4 || type === 15) { // if parsing subdocument or array or code with scope
       const slice = bsonDoc.slice(totalOffset, totalOffset + docOffset + docLength);
       const elements = onDemand.parseToElements(slice);
